@@ -1,0 +1,58 @@
+---
+
+- name: Install Wagtail dependencies
+  apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
+  with_items:
+    - g++ 
+    - libjpeg62-dev 
+    - zlib1g-dev
+  tags: packages
+
+# create a directory if it doesn't exist
+- name: Check if wagtail venv already exists
+  stat: path=/{{ webroot }}/webapps/{{ wagtail_venv_name }}
+  register: wagtail_test
+
+- name: Install pip inside virtualenv
+  pip:
+    name: pip
+    virtualenv: /{{ webroot }}/webapps/{{ wagtail_venv_name }}
+    virtualenv_python: python2.7
+    state: latest
+  when: not wagtail_test.stat.exists
+  become: True
+
+- name: Install packages required by the wagtail app inside virtualenv
+  pip: virtualenv=/{{ webroot }}/webapps/{{ wagtail_venv_name }} requirements=/vagrant/wagtail/requirements.txt
+  when: not wagtail_test.stat.exists
+
+- name: Check if wagtail project folder already exists in virtualenv
+  stat: path=/{{ webroot }}/webapps/{{ wagtail_venv_name }}/{{ wagtail_test_app_name}}
+  register: wagtail_test_subfolder
+
+- name: Create webroot directory
+  file: path=/{{ webroot }}/webapps/{{ wagtail_venv_name }}/{{ wagtail_test_app_name}} state=directory
+  when: not wagtail_test_subfolder.stat.exists
+
+# - name: Create Wagtail project inside virtualenv
+#   shell: python /{{ webroot }}/webapps/{{ wagtail_venv_name }}/lib/python2.7/site-packages/wagtail/bin/wagtail.py start wagtail_test
+#   args:
+#     chdir: /{{ webroot }}/webapps/{{ wagtail_venv_name }}
+#   when: not wagtail_test_subfolder.stat.exists
+#   become: True
+
+- pip: name=wagtail virtualenv=/{{ webroot }}/webapps/{{ wagtail_venv_name }}
+  with_items:
+    - wagtail
+  when: not wagtail_test_subfolder.stat.exists
+- template: src=venv_exec.j2 dest=/{{ webroot }}/webapps/{{ wagtail_venv_name }}/exec mode=755
+  when: not wagtail_test_subfolder.stat.exists
+- command: "/{{ webroot }}/webapps/{{ wagtail_venv_name }}/exec wagtail start {{ wagtail_test_app_name }} /{{ webroot }}/webapps/{{ wagtail_venv_name }}/{{ wagtail_test_app_name }}"
+  when: not wagtail_test_subfolder.stat.exists
+
+- name: Install packages required by the wagtail app inside new project
+  pip: virtualenv=/{{ webroot }}/webapps/{{ wagtail_venv_name }} requirements=/vagrant/webapps/wagtail_venv/wagtail_test/requirements.txt
+  when: not wagtail_test_subfolder.stat.exists
+
+- command: "/{{ webroot }}/webapps/{{ wagtail_venv_name }}/exec python manage.py migrate"
+  when: not wagtail_test_subfolder.stat.exists

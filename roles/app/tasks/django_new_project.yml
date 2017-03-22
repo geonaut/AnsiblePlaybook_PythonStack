@@ -1,0 +1,53 @@
+---
+
+- name: Check if django venv already exists
+  stat: path=/{{ webroot }}/webapps/{{ django_venv_name }}
+  register: django_test
+
+- name: Install pip inside virtualenv
+  pip:
+    name: pip
+    virtualenv: /{{ webroot }}/webapps/{{ django_venv_name }}
+    virtualenv_python: python2.7
+    state: latest
+  when: not django_test.stat.exists
+  become: True
+
+- name: Install packages required by the Django app inside virtualenv
+  pip: virtualenv=/{{ webroot }}/webapps/{{ django_venv_name }} requirements=/vagrant/requirements.txt
+  when: not django_test.stat.exists
+
+- name: Check if django project folder already exists in virtualenv
+  stat: path=/{{ webroot }}/webapps/{{ django_venv_name }}/{{ django_test_app_name}}
+  register: django_test_subfolder
+
+- name: Create Django project inside virtualenv
+  shell: /{{ webroot }}/webapps/{{ django_venv_name }}/lib/python2.7/site-packages/django/bin/django-admin.py startproject django_test
+  args:
+    chdir: /{{ webroot }}/webapps/{{ django_venv_name }}
+  when: not django_test_subfolder.stat.exists
+
+- name: Overwrite settings.py
+  template: src="django_settings.j2" dest="/{{ webroot }}/webapps/{{ django_venv_name }}/{{ django_test_app_name }}/{{ django_test_app_name }}/settings.py"
+  tags:
+    - template
+
+- name: Create Django migrations file
+  shell: ./manage.py makemigrations
+  args:
+    chdir: /{{ webroot }}/webapps/{{ django_venv_name }}/{{ django_test_app_name}}
+  when: not django_test_subfolder.stat.exists
+
+- name: Run migration file
+  shell: ./manage.py migrate
+  args:
+    chdir: /{{ webroot }}/webapps/{{ django_venv_name }}/{{ django_test_app_name}}
+  when: not django_test_subfolder.stat.exists
+
+- name: Collect static content
+  shell: ./manage.py collectstatic --no-input
+  args:
+    chdir: /{{ webroot }}/webapps/{{ django_venv_name }}/{{ django_test_app_name}}
+
+# Create a superuser 'python manage.py createsuperuser'
+# run the local Django webserver with `python manage.py runserver 0.0.0.0:8000`

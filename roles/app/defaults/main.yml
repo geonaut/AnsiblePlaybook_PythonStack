@@ -1,0 +1,4 @@
+---
+
+server_user: root
+virtualenv_python_version: python2.7

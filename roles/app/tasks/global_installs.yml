@@ -1,0 +1,13 @@
+---
+
+- name: Install Python core
+  apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
+  with_items:
+    - python-dev
+    - python-pip
+  tags: packages
+
+# Install global python packages.
+- pip:
+    name: virtualenv
+    name: django

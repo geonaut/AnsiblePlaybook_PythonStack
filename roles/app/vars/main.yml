@@ -1,0 +1,40 @@
+---
+
+# Application settings.
+virtualenv_path: "{{ webroot }}/{{ django_venv_name }}"
+project_path: "{{ virtualenv_path }}/{{ django_test_app_name }}"
+
+# Django settings
+django_venv_name: "django_venv"
+django_test_app_name: "django_test"
+
+# Wagtail settings
+wagtail_venv_name: "wagtail_venv"
+wagtail_test_app_name: "wagtail_test"
+
+application_log_dir: "{{ virtualenv_path }}/logs"
+application_log_file: "{{ application_log_dir }}/gunicorn_supervisor.log"
+
+
+# Gunicorn settings.
+# gunicorn_user: "{{ application_name }}"
+# gunicorn_group: webapps
+
+
+# Nginx settings.
+nginx_access_log_file: "{{ application_log_dir }}/nginx_access.log"
+nginx_error_log_file: "{{ application_log_dir }}/nginx_error.log"
+nginx_static_dir: "{{ virtualenv_path }}/static/"
+nginx_media_dir: "{{ virtualenv_path }}/media/"
+
+
+# Django environment variables.
+# django_environment:
+#   DJANGO_SETTINGS_MODULE: "{{ django_settings_file }}"
+#   DJANGO_SECRET_KEY: "{{ django_secret_key }}"
+#   MEDIA_ROOT: "{{ nginx_media_dir }}"
+#   STATIC_ROOT: "{{ nginx_static_dir }}"
+#   DATABASE_NAME: "{{ db_name }}"
+#   DATABASE_USER: "{{ db_user }}"
+#   DATABASE_PASSWORD: "{{ db_password }}"
+#   BROKER_URL: "{{ broker_url }}"
