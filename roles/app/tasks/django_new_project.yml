@@ -14,17 +14,33 @@
   become: True
 
 - name: Install packages required by the Django app inside virtualenv
-  pip: virtualenv=/{{ webroot }}/webapps/{{ django_venv_name }} requirements=/vagrant/requirements.txt
+  pip: virtualenv=/{{ webroot }}/webapps/{{ django_venv_name }} requirements=/vagrant/django/requirements.txt
   when: not django_test.stat.exists
 
-- name: Check if django project folder already exists in virtualenv
+# - name: Create Django project inside virtualenv
+#   shell: /{{ webroot }}/webapps/{{ django_venv_name }}/lib/python2.7/site-packages/django/bin/django-admin.py startproject django_test
+#   args:
+#     chdir: /{{ webroot }}/webapps/{{ django_venv_name }}
+#   when: not django_test_subfolder.stat.exists
+
+- name: Check if Django project folder already exists in virtualenv
   stat: path=/{{ webroot }}/webapps/{{ django_venv_name }}/{{ django_test_app_name}}
   register: django_test_subfolder
 
-- name: Create Django project inside virtualenv
-  shell: /{{ webroot }}/webapps/{{ django_venv_name }}/lib/python2.7/site-packages/django/bin/django-admin.py startproject django_test
-  args:
-    chdir: /{{ webroot }}/webapps/{{ django_venv_name }}
+- name: Create django project directory
+  file: path=/{{ webroot }}/webapps/{{ django_venv_name }}/{{ django_test_app_name}} state=directory
+  when: not django_test_subfolder.stat.exists
+
+- name: Install Django inside virtualenv using wrapper method
+  pip: 
+    name: django 
+    virtualenv: /{{ webroot }}/webapps/{{ django_venv_name }}
+  with_items:
+    - django
+  when: not django_test_subfolder.stat.exists
+- template: src=venv_exec.j2 dest=/{{ webroot }}/webapps/{{ django_venv_name }}/exec mode=755
+  when: not django_test_subfolder.stat.exists
+- command: "/{{ webroot }}/webapps/{{ django_venv_name }}/exec django-admin.py startproject {{ django_test_app_name }} /{{ webroot }}/webapps/{{ django_venv_name }}/{{ django_test_app_name }}"
   when: not django_test_subfolder.stat.exists
 
 - name: Overwrite settings.py
