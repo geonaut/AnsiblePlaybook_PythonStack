@@ -1,0 +1,7 @@
+---
+
+git_repo: https://github.com/geonaut/geonaut-portfolio.git
+
+# project_name: wagtail
+application_name: geonaut
+server_user: root

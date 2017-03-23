@@ -1,0 +1,15 @@
+---
+
+# Git settings.
+setup_git_repo: yes
+git_branch: master
+
+
+# Database settings.
+db_user: "{{ application_name }}"
+db_name: "{{ application_name }}"
+db_password: password
+
+# Nginx settings.
+# nginx_server_name: 192.168.33.15
+# nginx_strong_dh_group: no
