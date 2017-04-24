@@ -1,0 +1,21 @@
+---
+
+# Git settings.
+# setup_git_repo: yes
+git_branch: master
+
+# Domain name
+domain: "{{ application_name }}.co.uk"
+
+# Directory location settings
+webroot: vagrant
+
+
+# Database settings.
+db_user: "<insert>"
+db_name: "<insert>"
+db_password: "<insert>"
+
+# Nginx settings.
+# nginx_server_name: <insert>
+# nginx_strong_dh_group: no

@@ -2,7 +2,7 @@
 
 # Git settings.
 # setup_git_repo: yes
-# git_branch: development
+git_branch: dev
 
 # Domain name
 domain: "dev.{{ application_name }}.co.uk"
@@ -15,7 +15,6 @@ db_password: password
 
 # Directory location settings
 webroot: vagrant
-requirements_file: /{{ webroot }}/requirements.txt
 
 # Machine IP
 machine_IP: '192.168.10.2'
