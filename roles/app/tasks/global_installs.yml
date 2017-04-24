@@ -1,12 +1,18 @@
 ---
 
-- name: Install Python core
-  apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
-  with_items:
-    - python-dev
-    - python-pip
-  tags: packages
+# - name: Global > Install Python core
+#   apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
+#   with_items:
+#     - python-dev
+#     - python-pip
+#   tags: packages
 
-- name: Install global python packages
+- name: Install global virtualenv
   pip:
-    name: virtualenv
+    name: virtualenv==15.1.0
+  become: yes
+  become_user: root
+
+- name: Install global wagtail
+  pip:
+    name: wagtail
