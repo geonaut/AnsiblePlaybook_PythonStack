@@ -7,7 +7,6 @@
     - openssl
     - libssl-dev
     - libssl-doc
-  tags: packages
 
 - name: Install base packages
   apt: name={{ item }} update_cache={{ update_apt_cache }} force=yes state=installed
@@ -20,13 +19,12 @@
     - libpq-dev
     - python-dev
     - python-pip
+    - python3-pip
     - python-pycurl
     - ipython
-  tags: packages
 
 - name: Upgrade pip
   pip: name=pip state=latest
-  tags: packages
 
 - name: Add repository for Python 3.5 to the sources list
   apt_repository: repo='ppa:fkrull/deadsnakes'
@@ -40,4 +38,19 @@
     - python3.5-dev
     - python3-pip
     - ipython3
-  tags: packages
+
+- name: Update bashrc to add geonaut aliases for Vagrant user
+  lineinfile:
+    dest=/home/vagrant/.bashrc
+    line="{{ item.alias }} alias foo='bar'"
+    regexp="^{{  item.regex  }}"
+    owner=vagrant
+    state=present
+    insertafter=EOF
+    create=True
+  with_items:
+    - { alias: "alias geonaut='cd /vagrant/webapps/geonaut_venv'", regex: 'alias geonaut'}
+    - { alias: "alias geonautv='cd /vagrant/webapps/geonaut_venv;source bin/activate'", regex: 'alias geonautv'}
+    - { alias: "alias geonautvp='cd /vagrant/webapps/geonaut_venv/geonaut;source ../bin/activate'", regex: 'alias geonautvp'}
+  tags:
+    - development
