@@ -13,9 +13,10 @@
     - env_vars/prod.yml
 
   roles:
-    - base
-    - postgres
+    # - base
+    # - postgres
     # - nginx
-    # - app
+    - app
     # - gunicorn
+    # - certbot
 
