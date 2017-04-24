@@ -4,21 +4,70 @@
   apt: name=nginx update_cache={{ update_apt_cache }} state=installed
   tags: packages
 
-- name: Create the Nginx configuration file
-  template: src={{ application_name }}.j2
-            dest=/etc/nginx/sites-available/{{ application_name }}
-            backup=yes
-  notify: reload nginx
+- name: Ensure that a strong Diffie-Hellman group is used
+  command: openssl dhparam -out /etc/ssl/certs/dhparams.pem 2048 creates=/etc/ssl/certs/dhparams.pem
+  when: nginx_strong_dh_group is defined and nginx_strong_dh_group
+  tags:
+    - production
+
+- name: Ensure target directory exists
+  file:
+    dest: "/etc/nginx/sites-available"
+    state: directory
 
 - name: Ensure that the default site is disabled
   file: path=/etc/nginx/sites-enabled/default state=absent
   notify: reload nginx
 
-- name: Ensure that the application site is enabled
-  file: src=/etc/nginx/sites-available/{{ application_name }}
-        dest=/etc/nginx/sites-enabled/{{ application_name }}
-        state=link
+- name: Ensure log directory exists
+  file:
+    dest: "/var/log/nginx"
+    state: directory
+    owner: "root"
+    group: "www-data"
+    mode: 755
+
+# Skip the following for production environments: --skip-tags "development" 
+
+- name: Copy each file over that matches the given pattern
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/nginx/sites-available/"
+    owner: "root"
+    mode: 600
+  with_fileglob:
+    - "files/*"
+  tags:
+    - development
+
+- file:
+    src: /etc/nginx/sites-available/{{ item }}
+    dest: /etc/nginx/sites-enabled/{{ item }}
+    state: link
+  with_items:
+    - geonaut
+    - django_test
+    - wagtail_test
+    - wagtaildemo
+  tags:
+    - development
+
+# Skip the following for development environments: --skip-tags "production" 
+
+- name: Create the Nginx configuration file
+  template: src={{ application_name }}.j2
+            dest=/etc/nginx/sites-available/{{ application_name }}
   notify: reload nginx
+  tags:
+    - production
+
+- name: Create symlink to enable site in Nginx
+  file:
+    src: /etc/nginx/sites-available/geonaut
+    dest: /etc/nginx/sites-enabled/geonaut
+    state: link
+  tags:
+    - production
 
 - name: Ensure Nginx service is started
   service: name=nginx state=started enabled=yes
