@@ -1,0 +1,17 @@
+server {
+    listen      80;
+    server_name django-test;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+
+    location /static/ {
+        root /vagrant/webapps/django_venv/django_test;
+    }
+
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:///run/gunicorn/django_test_socket;
+    }
+
+    error_log /var/log/nginx/django_test_error.log notice;
+}
