@@ -1,9 +1,10 @@
 ---
 
 - name: Create webroot directory
-  file: path=/{{ webroot }}/webapps state=directory group=www-data
+  file: path=/{{ webroot }}/webapps state=directory
   # Become: True
 
-# - include: global_installs.yml
+- include: global_installs.yml
 # - include: django_new_project.yml
-- include: wagtail_new_project.yml
+# - include: wagtail_new_project.yml
+- include: geonaut_initial_setup.yml

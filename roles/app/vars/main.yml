@@ -12,6 +12,10 @@ django_test_app_name: "django_test"
 wagtail_venv_name: "wagtail_venv"
 wagtail_test_app_name: "wagtail_test"
 
+# Geonaut settings
+geonaut_venv_name: "geonaut_venv"
+geonaut_test_app_name: "geonaut"
+
 application_log_dir: "{{ virtualenv_path }}/logs"
 application_log_file: "{{ application_log_dir }}/gunicorn_supervisor.log"
 

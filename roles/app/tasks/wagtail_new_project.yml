@@ -30,7 +30,7 @@
   stat: path=/{{ webroot }}/webapps/{{ wagtail_venv_name }}/{{ wagtail_test_app_name}}
   register: wagtail_test_subfolder
 
-- name: Create webroot directory
+- name: Create wagtail project directory
   file: path=/{{ webroot }}/webapps/{{ wagtail_venv_name }}/{{ wagtail_test_app_name}} state=directory
   when: not wagtail_test_subfolder.stat.exists
 
@@ -45,7 +45,7 @@
   with_items:
     - wagtail
   when: not wagtail_test_subfolder.stat.exists
-- template: src=venv_exec.j2 dest=/{{ webroot }}/webapps/{{ wagtail_venv_name }}/exec mode=755
+- template: src=wagtail_venv_exec.j2 dest=/{{ webroot }}/webapps/{{ wagtail_venv_name }}/exec mode=755
   when: not wagtail_test_subfolder.stat.exists
 - command: "/{{ webroot }}/webapps/{{ wagtail_venv_name }}/exec wagtail start {{ wagtail_test_app_name }} /{{ webroot }}/webapps/{{ wagtail_venv_name }}/{{ wagtail_test_app_name }}"
   when: not wagtail_test_subfolder.stat.exists
@@ -54,5 +54,15 @@
   pip: virtualenv=/{{ webroot }}/webapps/{{ wagtail_venv_name }} requirements=/vagrant/webapps/wagtail_venv/wagtail_test/requirements.txt
   when: not wagtail_test_subfolder.stat.exists
 
-- command: "/{{ webroot }}/webapps/{{ wagtail_venv_name }}/exec python manage.py migrate"
+# - command: "/{{ webroot }}/webapps/{{ wagtail_venv_name }}/exec python manage.py migrate"
+  # when: not wagtail_test_subfolder.stat.exists
+
+- name: Run migration file
+  shell: /{{ webroot }}/webapps/{{ wagtail_venv_name }}/bin/python manage.py migrate
+  args:
+    chdir: /{{ webroot }}/webapps/{{ wagtail_venv_name }}/{{ wagtail_test_app_name}}
   when: not wagtail_test_subfolder.stat.exists
+
+# - lineinfile:
+#     path: "/Vagrant/webapps/wagtail_venv/wagtail_test/wagtail_test/settings/base.py"
+#     line: "ALLOWED_HOSTS = ['192.168.10.2']"
